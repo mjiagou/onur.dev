@@ -13,18 +13,24 @@ export const size = {
 export const contentType = sharedMetadata.ogImage.type
 
 export default async function Image() {
-  const [seoData = {}, regularFontData, boldFontData] = await Promise.all([
+  // 修改开始：接收原始响应
+  const [seoDataResponse, regularFontData, boldFontData] = await Promise.all([
     getPageSeo('bookmarks'),
     getRegularFont(),
     getBoldFont()
   ])
+  
+  // 修改：如果 getPageSeo 返回 null (因 API 失败或未找到)，则使用空对象 {}
+  const seoData = seoDataResponse || {}
+  // 修改结束
+
   const { seo: { title, description, ogImageTitle, ogImageSubtitle } = {} } = seoData
 
   return new ImageResponse(
     (
       <OpenGraphImage
-        title={ogImageTitle || title}
-        description={ogImageSubtitle || description}
+        title={ogImageTitle || title || 'Bookmarks'} 
+        description={ogImageSubtitle || description || 'Curated list of bookmarks'}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
