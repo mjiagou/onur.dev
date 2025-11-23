@@ -13,18 +13,22 @@ export const size = {
 export const contentType = sharedMetadata.ogImage.type
 
 export default async function Image() {
-  const [seoData = {}, regularFontData, boldFontData] = await Promise.all([
+  // 修改开始
+  const [seoDataResponse, regularFontData, boldFontData] = await Promise.all([
     getPageSeo('journey'),
     getRegularFont(),
     getBoldFont()
   ])
+  const seoData = seoDataResponse || {}
+  // 修改结束
+  
   const { seo: { title, description, ogImageTitle, ogImageSubtitle } = {} } = seoData
 
   return new ImageResponse(
     (
       <OpenGraphImage
-        title={ogImageTitle || title}
-        description={ogImageSubtitle || description}
+        title={ogImageTitle || title || 'Journey'}
+        description={ogImageSubtitle || description || 'My journey timeline'}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
