@@ -25,11 +25,18 @@ export async function generateStaticParams() {
 export async function GET(_, props) {
   const params = await props.params
   const { slug } = params
-  const [seoData = {}, regularFontData, boldFontData] = await Promise.all([
+  
+  // 修改开始：接收原始响应
+  const [seoDataResponse, regularFontData, boldFontData] = await Promise.all([
     getPageSeo(slug),
     getRegularFont(),
     getBoldFont()
   ])
+  
+  // 修复：如果 Contentful 返回 null，强制使用空对象，防止崩溃
+  const seoData = seoDataResponse || {}
+  // 修改结束
+
   const { seo: { title, description, ogImageTitle, ogImageSubtitle } = {} } = seoData
 
   let icon = null
