@@ -16,7 +16,7 @@ export async function generateStaticParams() {
   const allPages = await getAllPageSlugs()
 
   return allPages
-    .filter((page) => !page.hasCustomPage) // filter out pages that have custom pages, e.g. /journey
+    .filter((page) => !page.hasCustomPage) // 过滤掉已有自定义页面的 slug
     .map((page) => ({
       slug: page.slug
     }))
@@ -26,18 +26,22 @@ export async function GET(_, props) {
   const params = await props.params
   const { slug } = params
   
-  // 修改开始：接收原始响应
   const [seoDataResponse, regularFontData, boldFontData] = await Promise.all([
     getPageSeo(slug),
     getRegularFont(),
     getBoldFont()
   ])
   
-  // 修复：如果 Contentful 返回 null，强制使用空对象，防止崩溃
+  // --- 修复重点 ---
+  // 1. 确保 seoData 至少是个空对象
   const seoData = seoDataResponse || {}
-  // 修改结束
+  
+  // 2. 安全地获取 seo 属性，如果不存在则给个空对象
+  const seo = seoData.seo || {}
 
-  const { seo: { title, description, ogImageTitle, ogImageSubtitle } = {} } = seoData
+  // 3. 现在可以安全地解构了，所有值如果没有就是 undefined，不会报错
+  const { title, description, ogImageTitle, ogImageSubtitle } = seo
+  // --- 修复结束 ---
 
   let icon = null
   switch (slug) {
