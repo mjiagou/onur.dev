@@ -7,7 +7,7 @@ import { isDevelopment } from '@/lib/utils'
 const fetchGraphQL = cache(async (query, preview = isDevelopment) => {
   try {
     const res = await fetch(`https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`, {
-      cache: 'force-cache',
+      cache: 'no-store', // 关键修改：强制每次都获取最新数据，解决缓存导致的内容不显示问题
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
