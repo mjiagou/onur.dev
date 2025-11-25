@@ -23,20 +23,29 @@ export async function GET(_, props) {
   const params = await props.params
   const { isEnabled } = await draftMode()
   const { slug } = params
+  
   const [seoData, regularFontData, boldFontData] = await Promise.all([
     getWritingSeo(slug, isDevelopment ? true : isEnabled),
     getRegularFont(),
     getBoldFont()
   ])
+  
   if (!seoData) return null
+  
   const {
     seo: { title, ogImageTitle, ogImageSubtitle }
   } = seoData
 
+  // 🛡️ 关键修复：检测标题是否包含非拉丁字符（如中文）
+  // 如果包含中文，强制使用 "New Post" 作为安全标题，防止构建时字体加载超时崩溃
+  const displayTitle = ogImageTitle || title
+  const hasNonLatin = /[^\u0000-\u007f]/.test(displayTitle)
+  const safeTitle = hasNonLatin ? 'New Post' : displayTitle
+
   return new ImageResponse(
     (
       <OpenGraphImage
-        title={ogImageTitle || title}
+        title={safeTitle}
         description={ogImageSubtitle || 'by Onur Şuyalçınkaya'}
         url="writing"
       />
